@@ -50,10 +50,18 @@ Always respond in ${language === 'en' ? 'English' : language === 'ar' ? 'Arabic'
 Be helpful, enthusiastic, and provide practical, actionable advice. Keep responses conversational and engaging.`
     };
 
+    // Filter messages to only include role and content, remove timestamp and other properties
+    const filteredMessages = messages
+      .filter(m => m.role !== 'system')
+      .map(m => ({
+        role: m.role,
+        content: m.content
+      }));
+
     // Prepare messages for Groq
     const groqMessages = [
       systemMessage,
-      ...messages.filter(m => m.role !== 'system')
+      ...filteredMessages
     ];
 
     console.log('Sending request to Groq with messages:', groqMessages);
