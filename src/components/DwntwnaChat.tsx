@@ -1,10 +1,10 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Send, Globe, MapPin, DollarSign, Clock } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -78,23 +78,21 @@ const DwntwnaChat: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // This will be connected to your Supabase Edge Function
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      console.log('Calling Supabase Edge Function...');
+      
+      const { data, error } = await supabase.functions.invoke('chat', {
+        body: {
           messages: [...messages, userMessage],
           language: selectedLanguage?.code || 'en'
-        }),
+        }
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to get response');
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
       }
 
-      const data = await response.json();
+      console.log('Response from Edge Function:', data);
       
       const assistantMessage: Message = {
         role: 'assistant',
